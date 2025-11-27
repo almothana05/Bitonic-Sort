@@ -72,14 +72,14 @@ vector<int> sortBitonic(int n, vector<int> v){
     return u;
 }
 int main(){
-
-    for(int i = 1 ; i <= 10 ; i++){
+    int number_of_tests = 100;// adjustable
+    for(int i = 1 ; i <= number_of_tests ; i++){
         cout << "Test " << i << ": ";
     
-        int n = rnd(1 , 100000);
+        int n = rnd(1 , 100000); // adjustable
         vector<int> v(n);
         for(int i = 0 ; i < n; i++){
-            v[i] = rnd(-1000000000, 1000000000);
+            v[i] = rnd(-1000000000, 1000000000); // adjustable
         }
         vector<int> u = sortBitonic(n , v);
         sort(v.begin(), v.end());
