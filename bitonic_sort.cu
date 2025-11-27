@@ -27,14 +27,14 @@ int main(){
 
     int bit_count = (32 - __builtin_clz(n)); // number of bits used in n
     // (1 << x) is 1 left shift x which gets 2^x
-    int new_size =  1 << (bit_count - (1 << (bit_count - 1))); // size after padding 2^bit_count except when n is a power of 2 (n == (1 << bit_count - 1)) then no padding needed
-    int log_new_size = bit_count - ((1 << (bit_count - 1)));
+    int new_size =  1 << (bit_count - (n == (1 << (bit_count - 1)))); // size after padding 2^bit_count except when n is a power of 2 (n == (1 << bit_count - 1)) then no padding needed
+    int log_new_size = bit_count - (n == (1 << (bit_count - 1)));
 
     int arr[new_size];
     int maxi = INT_MAX;
 
     for(int i = 0 ; i < n ; i++){
-        cin >> arr[i]
+        cin >> arr[i];
     }
 
     for(int i = n ; i < new_size ; i++){
@@ -55,8 +55,6 @@ int main(){
         for(int step = 1 ; step <= stage ; step++){
             sort_it<<<blocks, threads>>>(d_arr, stage, step, new_size);
             cudaDeviceSynchronize();
-
-            cudaMemcpy(arr, d_arr, size, cudaMemcpyDeviceToHost);
         }
     }
 
