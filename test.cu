@@ -57,8 +57,6 @@ vector<int> sortBitonic(int n, vector<int> v){
             sort_it<<<blocks, threads>>>(d_arr, stage, step, new_size);
             cudaDeviceSynchronize();
 
-            cudaMemcpy(arr, d_arr, size, cudaMemcpyDeviceToHost);
-
         }
     }
 
@@ -84,7 +82,7 @@ int main(){
         vector<int> u = sortBitonic(n , v);
         sort(v.begin(), v.end());
 
-        if(u == v){
+    if(u == v){
             cout << "Passed \n";
         }
         else{
