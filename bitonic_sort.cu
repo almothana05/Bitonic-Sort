@@ -3,15 +3,15 @@
 using namespace std;
 
 
-__global__ void sort_it(int *d_arr, int stage, int step, int array_size, bool reverse){
+__global__ void sort_it(int *d_arr, int stage, int step, int array_size, int reverse){
     int i = threadIdx.x + blockDim.x * blockIdx.x;
     if(i >= array_size){
         return;
     }
 
     int dist = (1 << (stage - step)); // distance between the two swapped elements
-    bool active = (i / dist) % 2 == 0; // checks if the current element is active
-    bool ascending = ((i / (1 << stage)) % 2 == 0) ^ reverse; // checks weither the current element is in an ascending sort 
+    int active = (i / dist) % 2 == 0; // checks if the current element is active
+    int ascending = ((i / (1 << stage)) % 2 == 0) ^ reverse; // checks weither the current element is in an ascending sort 
 
     // (ascending ^ (d_arr[i] < d_arr[i + dist])) we are going to swap either if the two condition are not equal therefore we use xor
     if(active && (ascending ^ (d_arr[i] < d_arr[i + dist]))){
@@ -48,7 +48,9 @@ int main(){
         arr[i] = maxi;
     }
 
-    cout << "How do you want to sort it (0 for ascending and 1 for descending): "
+    cout << "How do you want to sort it (0 for ascending and 1 for descending): ";
+    int reverse;
+    cin >> reverse;
 
     int size = new_size * sizeof(int);
     int *d_arr;
@@ -62,7 +64,7 @@ int main(){
 
     for(int stage = 1 ; stage <= log_new_size ; stage++){
         for(int step = 1 ; step <= stage ; step++){
-            sort_it<<<blocks, threads>>>(d_arr, stage, step, new_size, 0);
+            sort_it<<<blocks, threads>>>(d_arr, stage, step, new_size, reverse);
             cudaDeviceSynchronize();
         }
     }

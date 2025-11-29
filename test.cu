@@ -24,7 +24,7 @@ __global__ void sort_it(int *d_arr, int stage, int step, int array_size, int rev
 }
 
 
-vector<int> sortBitonic(int n, vector<int> v){
+vector<int> sortBitonic(int n, vector<int> v, int reverse){
     int bit_count = (32 - __builtin_clz(n)); 
     int new_size =  1 << bit_count; 
     int log_new_size = bit_count;
@@ -55,7 +55,7 @@ vector<int> sortBitonic(int n, vector<int> v){
     
     for(int stage = 1 ; stage <= log_new_size ; stage++){
         for(int step = 1 ; step <= stage ; step++){
-            sort_it<<<blocks, threads>>>(d_arr, stage, step, new_size);
+            sort_it<<<blocks, threads>>>(d_arr, stage, step, new_size, reverse);
             cudaDeviceSynchronize();
 
         }
@@ -81,8 +81,12 @@ int main(){
         for(int i = 0 ; i < n; i++){
             v[i] = rnd(-1000000000, 1000000000); // adjustable
         }
-        vector<int> u = sortBitonic(n , v);
+        int reverse = rnd(0, 1);
+        vector<int> u = sortBitonic(n , v, reverse);
         sort(v.begin(), v.end());
+        if(reverse){
+            reverse(v.being(), v.end());
+        }
 
     if(u == v){
             cout << "Passed \n";
