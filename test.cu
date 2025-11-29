@@ -6,18 +6,17 @@ int rnd(int x, int y) {
     return uniform_int_distribution<int>(x, y)(rng);
 }
 
-__global__ void sort_it(int *d_arr, int stage, int step, int array_size){
-
+__global__ void sort_it(int *d_arr, int stage, int step, int array_size, int reverse){
     int i = threadIdx.x + blockDim.x * blockIdx.x;
     if(i >= array_size){
         return;
     }
 
-    int dist = (1 << (stage - step)); // distance between the two swapped elements
-    int status = (i / dist) % 2;
-    int segment_phase = (i / (1 << stage)) % 2;
+    int dist = (1 << (stage - step)); 
+    int active = (i / dist) % 2 == 0; 
+    int ascending = ((i / (1 << stage)) % 2 == 0) ^ reverse; 
 
-    if(status == 0 && ((segment_phase == 0) ^ (d_arr[i] < d_arr[i + dist]))){
+    if(active && (ascending ^ (d_arr[i] < d_arr[i + dist]))){
         int numm = d_arr[i];
         d_arr[i] = d_arr[i + dist];
         d_arr[i + dist] = numm;
@@ -26,10 +25,13 @@ __global__ void sort_it(int *d_arr, int stage, int step, int array_size){
 
 
 vector<int> sortBitonic(int n, vector<int> v){
-    int bit_count = (32 - __builtin_clz(n));
-    int new_size =  1 << (bit_count - (n == (1 << bit_count)));
-    int log_new_size = bit_count - (n == (1 << bit_count));
-
+    int bit_count = (32 - __builtin_clz(n)); 
+    int new_size =  1 << bit_count; 
+    int log_new_size = bit_count;
+    if(n == 1 << (bit_count - 1) ){
+        new_size = n;
+        log_new_size = bit_count - 1;
+    }
     int arr[new_size];
     int maxi = INT_MAX;
 
@@ -53,7 +55,6 @@ vector<int> sortBitonic(int n, vector<int> v){
     
     for(int stage = 1 ; stage <= log_new_size ; stage++){
         for(int step = 1 ; step <= stage ; step++){
-            // cout << stage << ' ' << step << endl;
             sort_it<<<blocks, threads>>>(d_arr, stage, step, new_size);
             cudaDeviceSynchronize();
 
@@ -69,6 +70,7 @@ vector<int> sortBitonic(int n, vector<int> v){
     }
     return u;
 }
+
 int main(){
     int number_of_tests = 100;// adjustable
     for(int i = 1 ; i <= number_of_tests ; i++){
